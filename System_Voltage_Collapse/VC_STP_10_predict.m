@@ -33,10 +33,9 @@ x_warmup = ts_predict( warmup_r_step_cut+1 : warmup_r_step_cut+warmup_r_step_len
 fprintf('predicting...\n');
 flag_r = [n dim a warmup_r_step_length predict_r_step_cut predict_r_step_length];
 predict_r = func_STP_predict(x_warmup,tp_W * ( tp + tp_bias) ,W_in,res_net,P,flag_r);
-
 toc;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% plot
+
+%% plot
 label_font_size = 12;
 ticks_font_size = 12;
 

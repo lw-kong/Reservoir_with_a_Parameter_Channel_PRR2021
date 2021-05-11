@@ -23,7 +23,7 @@ train_r_step_cut = round( 500 / reservoir_tstep ); % drop the transient in data
 train_r_step_length = round( 500 /reservoir_tstep );
 validate_r_step_length = round( 25 /reservoir_tstep );
 
-bo = 5;
+bo = 5; % best of
 
 
 para_train_set = [2.98968 2.98973 2.98978];
