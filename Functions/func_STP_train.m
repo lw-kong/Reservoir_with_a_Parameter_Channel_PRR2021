@@ -1,11 +1,11 @@
-function [validation_performance,W_in,res_net,P,t_validate,x_real,x_validate] = ...
-    func_STP_train(udata,tp_train_set,flag,W_in_type,res_net_type,validation_type)
+function [validation_performance,W_in,W_r,W_out,t_validate,x_real,x_validate] = ...
+    func_STP_train(udata,tp_train_set,flag,W_in_type,W_r_type,validation_type)
 % use multiple trials of training to train one single result Wout
 % Tp is affecting globally. Each node receives the same all control parameter
 % W_in_type
 %           1 : each node receives all dim of the input, a dense W_in
 %           2 : each node receives one dim of the input
-% res_net_type
+% W_r_type
 %           1 : symmeric, normally distributed, with mean 0 and variance 1
 %           2 : asymmeric, uniformly distributed between 0 and 1
 % validation type
@@ -74,25 +74,25 @@ else
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % define reservoir_network
-if res_net_type == 1
-    res_net=sprandsym(n,k/n); % symmeric, normally distributed, with mean 0 and variance 1.
-elseif res_net_type == 2
+if W_r_type == 1
+    W_r=sprandsym(n,k/n); % symmeric, normally distributed, with mean 0 and variance 1.
+elseif W_r_type == 2
     k = round(k);
     index1=repmat(1:n,1,k)'; % asymmeric, uniformly distributed between 0 and 1
     index2=randperm(n*k)';
     index2(:,2)=repmat(1:n,1,k)';
     index2=sortrows(index2,1);
     index1(:,2)=index2(:,2);
-    res_net=sparse(index1(:,1),index1(:,2),rand(size(index1,1),1),n,n); 
+    W_r=sparse(index1(:,1),index1(:,2),rand(size(index1,1),1),n,n); 
 else
     fprintf('res_net type error\n');
     return
 end
-%res_net, adjacency matrix
-%rescale eig
-eig_D=eigs(res_net,1); %only use the biggest one. Warning about the others is harmless
-res_net=(eig_rho/(abs(eig_D))).*res_net;
-res_net=full(res_net);
+% W_r, adjacency matrix of the hidden layer, i.e. the reservoir network
+% rescale eig
+eig_D=eigs(W_r,1); %only use the biggest one. Warning about the others is harmless
+W_r=(eig_rho/(abs(eig_D))).*W_r;
+W_r=full(W_r);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % training
@@ -112,7 +112,7 @@ for tp_i = 1:tp_length
     r_all=[];
     r_all(:,1)=zeros(n,1);%2*rand(n,1)-1;%
     for ti=1:train_length
-        r_all(:,ti+1)=(1-a)*r_all(:,ti) + a*tanh(res_net*r_all(:,ti)+W_in*train_x(:,ti));
+        r_all(:,ti+1)=(1-a)*r_all(:,ti) + a*tanh(W_r*r_all(:,ti)+W_in*train_x(:,ti));
     end
     r_out=r_all(:,12:end); % n * (train_length - 11)
     r_out(2:2:end,:)=r_out(2:2:end,:).^2;
@@ -121,7 +121,7 @@ for tp_i = 1:tp_length
     r_reg(:, (tp_i-1)*(train_length-10) +1 : tp_i*(train_length-10) ) = r_out;
     y_reg(:, (tp_i-1)*(train_length-10) +1 : tp_i*(train_length-10) ) = train_y(1:dim,11:end); %no tp
 end
-P= y_reg *r_reg'*(r_reg*r_reg'+beta*eye(n))^(-1);
+W_out= y_reg *r_reg'*(r_reg*r_reg'+beta*eye(n))^(-1);
 
 
 %
@@ -142,10 +142,10 @@ for tp_i = 1:tp_length
     %u(dim+1:end) = udata(tp_i,train_length+1,dim+1:end);
     for t_i = 1:validate_length
         u(dim+1:end) = udata(tp_i,train_length+t_i,dim+1:end);
-        r = (1-a) * r + a * tanh(res_net*r+W_in*u);
+        r = (1-a) * r + a * tanh(W_r*r+W_in*u);
         r_out = r;
         r_out(2:2:end,1) = r_out(2:2:end,1).^2; %even number -> squared
-        predict_y = P * r_out;
+        predict_y = W_out * r_out;
         validate_predict_y_set(tp_i,t_i,:) = predict_y;
         u(1:dim) = predict_y;
     end
