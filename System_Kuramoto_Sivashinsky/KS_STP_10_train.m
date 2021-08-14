@@ -61,14 +61,14 @@ for bo_i = 1:bo
     fprintf('training...\n');
     flag_r_train = [n k eig_rho W_in_a a beta train_r_step_cut train_r_step_length validate_r_step_length...
         reservoir_tstep dim success_threshold];
-    [success_length,W_in_temp,res_net_temp,P_temp,t_validate_temp,x_real_temp,x_validate_temp] = ...
+    [success_length,W_in_temp,W_r_temp,W_out_temp,t_validate_temp,x_real_temp,x_validate_temp] = ...
         func_STP_train(train_data,tp_train_set,flag_r_train,2,2,2);
  
     
     if success_length > success_length_max
         W_in = W_in_temp;
-        res_net = res_net_temp;
-        P = P_temp;
+        W_r = W_r_temp;
+        W_out = W_out_temp;
         t_validate = t_validate_temp;
         x_real = x_real_temp;
         x_validate = x_validate_temp;

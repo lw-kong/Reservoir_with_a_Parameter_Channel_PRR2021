@@ -30,7 +30,7 @@ toc;
 %% predict
 fprintf('predicting...\n');
 flag_r = [n dim a warmup_r_step_length predict_r_step_cut predict_r_step_length];
-predict_r = func_STP_predict(x_warmup,tp_W * ( tp + tp_bias) ,W_in,res_net,P,flag_r);
+predict_r = func_STP_predict(x_warmup,tp_W * ( tp + tp_bias) ,W_in,W_r,W_out,flag_r);
 toc;
 
 %% plot
