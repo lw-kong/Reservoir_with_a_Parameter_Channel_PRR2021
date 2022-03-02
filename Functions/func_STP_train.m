@@ -6,6 +6,7 @@ function [validation_performance,W_in,W_r,W_out,t_validate,x_real,x_validate] = 
 % udata: The training data set.
 % tp_train_set: The set of training control parameters.
 
+
 % use multiple trials of training time series to train one W_out
 % Tp is affecting globally. Each node receives the same all control parameter
 % W_in_type
@@ -45,8 +46,8 @@ else
     success_threshold = 0;
 end
 
-tp_length = length(tp_train_set); % number of trials of training time series
-tp_dim = size(udata,3) - dim; % dimensionality of control parameter
+tp_length = length(tp_train_set); % number of trials of training time series, i.e. the number of different control parameters (bifurcation parameters) in the training data
+tp_dim = size(udata,3) - dim; % dimensionality of the control parameter (bifurcation parameter)
 
 validate_start = train_length+2;
 
@@ -109,11 +110,11 @@ len_washout = 10; % number of intial training steps to be dropped during regress
 r_reg = zeros(n,tp_length*(train_length-len_washout));
 y_reg = zeros(dim,tp_length*(train_length-len_washout));
 r_end = zeros(n,tp_length);
-for tp_i = 1:tp_length
+for tp_i = 1:tp_length % for all the different control parameters (bifurcation parameters)
     train_x = zeros(train_length,dim+tp_dim);
     train_y = zeros(train_length,dim+tp_dim);
     train_x(:,:) = udata(tp_i,1:train_length,:);
-    train_y(:,:) = udata(tp_i,2:train_length+1,:);
+    train_y(:,:) = udata(tp_i,2:train_length+1,:); % the desired output is the prediction of the next step
     train_x = train_x';
     train_y = train_y';
     
@@ -123,19 +124,19 @@ for tp_i = 1:tp_length
     for ti = 1:train_length
         r_all(:,ti+1) = (1-a)*r_all(:,ti) + a*tanh(W_r*r_all(:,ti)+W_in*train_x(:,ti));
     end
-    r_out = r_all(:,len_washout+2:end); % n * (train_length - 11)
+    r_out = r_all(:,len_washout+2:end);
     r_out(2:2:end,:) = r_out(2:2:end,:).^2; % squaring the even rows
-    r_end(:,tp_i) = r_all(:,end); % n * 1
+    r_end(:,tp_i) = r_all(:,end);
     
-    r_reg(:, (tp_i-1)*(train_length-len_washout) +1 : tp_i*(train_length-len_washout) ) = r_out;
-    y_reg(:, (tp_i-1)*(train_length-len_washout) +1 : tp_i*(train_length-len_washout) ) = train_y(1:dim,len_washout+1:end);
+    r_reg(:, (tp_i-1)*(train_length-len_washout) +1 : tp_i*(train_length-len_washout) ) = r_out; % the hidden state during training
+    y_reg(:, (tp_i-1)*(train_length-len_washout) +1 : tp_i*(train_length-len_washout) ) = train_y(1:dim,len_washout+1:end); % the training target
 end
-W_out = y_reg *r_reg'*(r_reg*r_reg'+beta*eye(n))^(-1);
-
+W_out = y_reg *r_reg'*(r_reg*r_reg'+beta*eye(n))^(-1); % the ridge regression between y_reg and r_reg
+% Now we got the readout layer (output layer) W_out
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% validate resnet model
+% validate
 %disp('validating...')
 rmse_set = zeros(1,tp_length);
 success_length_set = zeros(1,tp_length);
@@ -146,7 +147,7 @@ for tp_i = 1:tp_length
     validate_real_y_set(tp_i,:,:) = udata(tp_i,validate_start:(validate_start+validate_length-1),1:dim);
     
     r = r_end(:,tp_i);
-    u = zeros(dim+tp_dim,1);
+    u = zeros(dim+tp_dim,1); % input
     u(1:dim) = udata(tp_i,train_length+1,1:dim);
     %u(dim+1:end) = udata(tp_i,train_length+1,dim+1:end);
     for t_i = 1:validate_length
@@ -154,9 +155,9 @@ for tp_i = 1:tp_length
         r = (1-a) * r + a * tanh(W_r*r+W_in*u);
         r_out = r;
         r_out(2:2:end,1) = r_out(2:2:end,1).^2; % squaring even rows
-        predict_y = W_out * r_out;
+        predict_y = W_out * r_out; % output
         validate_predict_y_set(tp_i,t_i,:) = predict_y;
-        u(1:dim) = predict_y;
+        u(1:dim) = predict_y; % update the input. The output of the current state is the input of the next step.
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     error = zeros(validate_length,dim);
