@@ -1,5 +1,6 @@
 function [t,x] = ode4(f,t,x0)
-%RK-4 solver for constant step length
+% 4th order Runge-Kutta solver with constant step length
+% x0 is the initial state
 
 x = zeros(length(x0),length(t));
 x(:,1) = x0;
