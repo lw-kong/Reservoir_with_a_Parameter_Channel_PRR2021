@@ -1,7 +1,7 @@
 function [validation_performance,W_in,W_r,W_out,t_validate,x_real,x_validate] = ...
     func_STP_train(udata,tp_train_set,flag,W_in_type,W_r_type,validation_type)
 % W_in: The input matrix.
-% W_r: The recurrent matrix in the hidden layer, i.e. the reservoir network, or the adjacency matrix of the hidden layer.
+% W_r: The recurrent matrix in the hidden layer, i.e. the reservoir network, or the adjacency matrix of the hidden layer.  (We called it matrix 'A' in the paper)
 % W_out: The output matrix.
 % udata: The training data set.
 % tp_train_set: The set of training control parameters.
