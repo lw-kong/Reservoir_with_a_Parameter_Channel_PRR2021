@@ -3,12 +3,12 @@
 addpath '..\Functions'
 
 warmup_r_step_cut = 200 /reservoir_tstep; % drop the transient
-warmup_r_step_length = 30 / reservoir_tstep;
+warmup_r_step_length = 30 / reservoir_tstep; % length of the warm up
 
-predict_r_step_cut = 0 /reservoir_tstep;
-predict_r_step_length = 200 * 40 / reservoir_tstep;
+predict_r_step_cut = 0 /reservoir_tstep; % drop the transient
+predict_r_step_length = 200 * 40 / reservoir_tstep; % length of the prediction
 
-ghost_k = 1; % bifurcation parameter
+ghost_k = 1; % value of the bifurcation parameter that we want to predict
 
 tp = ghost_k;
 ghost_k_warmup = min( [0.99,ghost_k]);
@@ -23,10 +23,9 @@ flag_ghost = [xc yc xp yp r0 c0 ghost_k_warmup];
 ts_warmup = zeros(1,3);
 while min(ts_warmup(:,3)) < 0.5
     x0 = [ 0.4 * rand + 0.6 ; 0.4 * rand + 0.15 ; 0.5 * rand + 0.3];
-    [t,ts_warmup] = ode4(@(t,x) eq_ghost(t,x,flag_ghost),...
+    [~,ts_warmup] = ode4(@(t,x) eq_ghost(t,x,flag_ghost),...
         0:reservoir_tstep/ratio_tstep:tmax_timeseries_warmup,x0);
 end
-t = t(1:ratio_tstep:end);
 ts_warmup = ts_warmup(1:ratio_tstep:end,:);
 x_warmup = ts_warmup( warmup_r_step_cut+1 : warmup_r_step_cut+warmup_r_step_length, :);
 
@@ -41,7 +40,6 @@ label_font_size = 12;
 ticks_font_size = 12;
 
 plot_dim = 3;
-
 figure()
 plot( reservoir_tstep * (0:1:length(predict_r)-1) ,predict_r(:,plot_dim))
 title(['k = ' num2str(ghost_k,8)])
