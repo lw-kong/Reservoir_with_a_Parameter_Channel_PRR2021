@@ -1,5 +1,4 @@
-addpath('\klw\Research\Functions');
-addpath('\klw\Research\Reservoir\PredictBehaviorUnderDiffPara\STP_reorganize_phase');
+addpath('..\Functions');
 
 
 warmup_r_step_cut = 20;
@@ -68,3 +67,4 @@ set(gcf,'color','white')
 grid on
 box on
 %
+
