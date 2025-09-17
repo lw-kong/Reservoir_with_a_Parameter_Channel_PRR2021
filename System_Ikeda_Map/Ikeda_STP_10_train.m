@@ -4,8 +4,7 @@
 % no return map validation
 % control parameter is 1 dim
 
-addpath('\klw\Research\Functions');
-addpath('\klw\Research\Reservoir\PredictBehaviorUnderDiffPara\STP_reorganize_phase');
+addpath('..\Functions');
 
 
 dim = 2;
@@ -190,5 +189,6 @@ for tp_i = 1:length(tp_train_set)
     
 end
 hold off
+
 
 %
