@@ -9,26 +9,6 @@ addpath('..\Functions');
 
 dim = 2;
 
-% opt_Ikeda_SameData_20201104T135550_683.mat
-n = 800;
-k = 266;
-eig_rho = 0;
-W_in_a = 2.95;
-tp_W = 0.456;
-tp_bias = -3.00;
-a = 0.84;
-beta = 1.6 * 10^(-4);
-
-% opt_Ikeda_SameData_20201104T155128_337.mat
-n = 100;
-k = 91;
-eig_rho = 0;
-W_in_a = 2;
-tp_W = 0.21;
-tp_bias = 2.23;
-a = 1;
-beta = 1 * 10^(-8);
-
 % opt_Ikeda_SameData_20201104T151717_320.mat
 n = 400;
 k = 283;
@@ -38,17 +18,6 @@ tp_W = 0.35;
 tp_bias = 0.47;
 a = 1;
 beta = 1 * 10^(-6);
-
-%{
-n = 400;
-k = 100;
-eig_rho = 0.2;
-W_in_a = 2;
-tp_W = 0.5;
-tp_bias = 0.5;
-a = 1;
-beta = 1 * 10^(-6);
-%}
 
 reservoir_tstep = 1;
 ratio_tstep = 1;
@@ -192,3 +161,4 @@ hold off
 
 
 %
+
